@@ -18,7 +18,7 @@ mcp-playground-server/
 
 ## Installation
 
-See FIXTHIS
+See docs [here](https://kafka-docker-playground.io/#/cli?id=%f0%9f%a4%96-setup-mcp-server-for-playground-cli).
 
 ## Usage
 
