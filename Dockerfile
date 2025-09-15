@@ -34,9 +34,6 @@ COPY --from=builder /app/dist ./dist
 # Copy any additional files needed at runtime
 COPY --from=builder /app/src ./src
 
-# Copy bashly.yml configuration file from scripts directory
-COPY scripts/cli/src/bashly.yml ./bashly.yml
-
 # Copy entrypoint script
 COPY entrypoint.sh ./entrypoint.sh
 
