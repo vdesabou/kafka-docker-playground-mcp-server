@@ -1,8 +1,5 @@
 import * as yaml from 'yaml';
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import axios from 'axios';
 
 export interface PlaygroundCommand {
   name: string;
@@ -23,49 +20,30 @@ export interface PlaygroundOption {
 
 export class PlaygroundCliParser {
   private commands: PlaygroundCommand[] = [];
-  private yamlPath: string;
+  private static readonly REMOTE_YML_URL = 'https://raw.githubusercontent.com/vdesabou/kafka-docker-playground/refs/heads/master/scripts/cli/src/bashly.yml';
+  private commandsLoaded: boolean = false;
 
   constructor() {
-    // Priority order for bashly.yml location:
-    // 1. Environment variable (for custom mount)
-    // 2. Embedded file in Docker image
-    // 3. Relative path (for local development)
-    if (process.env.BASHLY_YML_PATH && fs.existsSync(process.env.BASHLY_YML_PATH)) {
-      this.yamlPath = process.env.BASHLY_YML_PATH;
-    } else if (fs.existsSync('/app/bashly.yml')) {
-      // Embedded in Docker image
-      this.yamlPath = '/app/bashly.yml';
-    } else {
-      // Use relative path since MCP server is part of the repo
-      // Get the directory of this file in ES modules
-      const __filename = fileURLToPath(import.meta.url);
-      const __dirname = dirname(__filename);
-      this.yamlPath = path.join(__dirname, '..', '..', 'scripts', 'cli', 'src', 'bashly.yml');
-    }
+    // Always fetch from remote URL
+    // Note: loadCommands is async, but constructor can't be async, so we use a promise
     this.loadCommands();
   }
 
-  private loadCommands(): void {
+  private async loadCommands(): Promise<void> {
     const isDebug = process.env.NODE_ENV !== 'production';
-    
     try {
-      if (isDebug) console.error(`Looking for bashly.yml at: ${this.yamlPath}`);
-      
-      if (fs.existsSync(this.yamlPath)) {
-        if (isDebug) console.error(`Loading bashly.yml from: ${this.yamlPath}`);
-        const yamlContent = fs.readFileSync(this.yamlPath, 'utf8');
-        const parsed = yaml.parse(yamlContent);
-        this.commands = this.parseYamlCommands(parsed);
-        if (isDebug) console.error(`Successfully loaded ${this.commands.length} commands from bashly.yml`);
-      } else {
-        console.error(`bashly.yml not found at ${this.yamlPath}`);
-        if (isDebug) console.error('Using default command structure');
-        this.commands = this.getDefaultCommands();
-      }
+      if (isDebug) console.error(`Fetching bashly.yml from remote URL: ${PlaygroundCliParser.REMOTE_YML_URL}`);
+      const response = await axios.get(PlaygroundCliParser.REMOTE_YML_URL);
+      const yamlContent = response.data;
+      const parsed = yaml.parse(yamlContent);
+      this.commands = this.parseYamlCommands(parsed);
+      this.commandsLoaded = true;
+      if (isDebug) console.error(`Successfully loaded ${this.commands.length} commands from remote bashly.yml`);
     } catch (error) {
-      console.error('Error loading bashly.yml:', error);
+      console.error('Error fetching or parsing remote bashly.yml:', error);
       if (isDebug) console.error('Falling back to default command structure');
       this.commands = this.getDefaultCommands();
+      this.commandsLoaded = true;
     }
   }
 
@@ -205,6 +183,11 @@ export class PlaygroundCliParser {
   }
 
   public getCommands(): PlaygroundCommand[] {
+    // If commands are not loaded yet, warn and return empty array (should be rare)
+    if (!this.commandsLoaded) {
+      console.error('Warning: Commands not loaded yet, returning empty command list.');
+      return [];
+    }
     return this.commands;
   }
 
