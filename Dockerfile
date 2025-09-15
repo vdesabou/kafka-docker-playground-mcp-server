@@ -25,8 +25,8 @@ WORKDIR /app
 # Copy package files
 COPY mcp-playground-server/package*.json ./
 
-# Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install only production dependencies and ensure axios is present
+RUN npm ci --only=production && npm install axios && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
