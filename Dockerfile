@@ -5,14 +5,14 @@ FROM node:20-alpine3.20 AS builder
 WORKDIR /app
 
 # Copy package files
-COPY mcp-playground-server/package*.json ./
-COPY mcp-playground-server/tsconfig.json ./
+COPY package*.json ./
+COPY tsconfig.json ./
 
 # Install all dependencies (including dev dependencies for building)
 RUN npm ci
 
 # Copy source code
-COPY mcp-playground-server/src/ ./src/
+COPY src/ ./src/
 
 # Build the TypeScript project
 RUN npm run build
@@ -23,7 +23,7 @@ FROM node:20-alpine3.20 AS production
 WORKDIR /app
 
 # Copy package files
-COPY mcp-playground-server/package*.json ./
+COPY package*.json ./
 
 # Install only production dependencies and ensure axios is present
 RUN npm ci --only=production && npm install axios && npm cache clean --force
@@ -38,7 +38,7 @@ COPY --from=builder /app/src ./src
 COPY scripts/cli/src/bashly.yml ./bashly.yml
 
 # Copy entrypoint script
-COPY mcp-playground-server/entrypoint.sh ./entrypoint.sh
+COPY entrypoint.sh ./entrypoint.sh
 
 # Build the TypeScript project, create user, and set permissions
 RUN addgroup -g 1001 -S nodejs && \
