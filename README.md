@@ -10,6 +10,10 @@ mcp-playground-server/
 │   └── suggester.ts      # Command suggestion logicand assistance for the Kafka Docker Playground CLI. It integrates with GitHub Copilot to offer contextual help, command suggestions, and debugging assistance for playground commands.
 ```
 
+<a href="https://glama.ai/mcp/servers/@vdesabou/kafka-docker-playground-mcp-server">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@vdesabou/kafka-docker-playground-mcp-server/badge" alt="Playground Server MCP server" />
+</a>
+
 ## Features
 
 - **Command Completion**: Auto-complete playground commands with context-aware suggestions
