@@ -44,35 +44,38 @@ anything.
 
 ## Installation
 
-```bash
-npm install
-npm run build
-```
+### Claude Code, from the playground repository
 
-### Claude Code
-
-```bash
-claude mcp add playground \
-  --env PLAYGROUND_REPO_ROOT=/path/to/kafka-docker-playground \
-  -- node /path/to/kafka-docker-playground-mcp-server/dist/index.js
-```
+Nothing to install. [kafka-docker-playground](https://github.com/vdesabou/kafka-docker-playground)
+ships a `.mcp.json` at its root that declares this server, so running `claude`
+from the checkout offers it — accept it once. `playground ai` accepts it for you.
 
 ### Any MCP client
-
-See `config.json`:
 
 ```json
 {
   "mcpServers": {
-    "playground": {
-      "command": "node",
-      "args": ["/absolute/path/to/kafka-docker-playground-mcp-server/dist/index.js"],
-      "env": {
-        "PLAYGROUND_REPO_ROOT": "/absolute/path/to/kafka-docker-playground"
-      }
+    "mcp-playground": {
+      "command": "npx",
+      "args": ["-y", "github:vdesabou/kafka-docker-playground-mcp-server"]
     }
   }
 }
+```
+
+No path is needed when the client starts the server inside the playground
+checkout: the repo root is found by walking up from the working directory. When
+it does not — Claude desktop, for instance — add
+`"env": { "PLAYGROUND_REPO_ROOT": "/path/to/kafka-docker-playground" }`.
+
+### A local clone, for working on the server itself
+
+A `local` scope server shadows the one from `.mcp.json`, so point it at your
+build and the playground repository keeps working unchanged:
+
+```bash
+npm install && npm run build
+claude mcp add mcp-playground -- node /path/to/kafka-docker-playground-mcp-server/dist/index.js
 ```
 
 ## Configuration
