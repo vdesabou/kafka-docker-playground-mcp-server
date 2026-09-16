@@ -71,11 +71,30 @@ function readmeBody(dir: string): string {
 }
 
 /** `config-io.confluent.connect.s3.S3SinkConnector.json` -> the connector class. */
-function connectorClasses(files: string[]): string[] {
+function connectorClassesFromFiles(files: string[]): string[] {
   const classes = new Set<string>();
   for (const file of files) {
     const match = /^config-(.+)\.(json|txt)$/.exec(file);
     if (match) classes.add(match[1]);
+  }
+  return [...classes];
+}
+
+/**
+ * The `config-<CLASS>` convention only covers part of the repository: the
+ * `ccloud/fm-*` examples follow it, but the Confluent Cloud custom-connector
+ * examples, most of `reproduction-models/` and a long tail elsewhere carry the
+ * class only inside the payload they post. Reading it from the script also
+ * makes the class *per script* rather than per directory, which matters when a
+ * folder holds several variants.
+ */
+function connectorClassesFromScript(content: string): string[] {
+  const classes = new Set<string>();
+  const pattern = /"connector\.class"\s*:\s*"([^"$]+)"/g;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(content)) !== null) {
+    const value = match[1].trim();
+    if (value) classes.add(value);
   }
   return [...classes];
 }
@@ -99,7 +118,7 @@ function scanDirectory(
   );
 
   if (shellScripts.length > 0) {
-    const classes = connectorClasses(files);
+    const directoryClasses = connectorClassesFromFiles(files);
     const title = readmeTitle(absoluteDir);
     const readme = readmeBody(absoluteDir);
     const relativeDir = path.relative(repoRoot(), absoluteDir);
@@ -114,6 +133,11 @@ function scanDirectory(
       if (!content.includes(RUNNABLE_MARKER)) continue;
 
       const name = file.replace(/\.sh$/, "");
+      // The script's own payload wins; the directory convention fills the gap
+      // for the examples that post no inline configuration.
+      const classes = [
+        ...new Set([...connectorClassesFromScript(content), ...directoryClasses]),
+      ];
       into.push({
         script: path.join(relativeDir, file),
         dir: relativeDir,
