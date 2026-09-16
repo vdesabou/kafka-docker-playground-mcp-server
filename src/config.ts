@@ -25,6 +25,16 @@ function walkUp(from: string): string | null {
 let cached: string | null = null;
 
 /**
+ * Picks the first env value that is a real path. An MCP client that does not
+ * substitute `${VAR}` in its config hands the placeholder through verbatim;
+ * treating that as a path would fail the whole server instead of falling back
+ * to walking up from the working directory, which is what the caller meant.
+ */
+function firstUsable(...values: Array<string | undefined>): string | undefined {
+  return values.find((value) => value && !value.includes("${"));
+}
+
+/**
  * Resolution order: explicit env var, then upward from cwd, then the two
  * conventional checkout locations. Throws with actionable text rather than
  * silently falling back to a stub — a wrong repo root makes every answer wrong.
@@ -32,8 +42,10 @@ let cached: string | null = null;
 export function repoRoot(): string {
   if (cached) return cached;
 
-  const fromEnv =
-    process.env.PLAYGROUND_REPO_ROOT || process.env.KAFKA_DOCKER_PLAYGROUND_DIR;
+  const fromEnv = firstUsable(
+    process.env.PLAYGROUND_REPO_ROOT,
+    process.env.KAFKA_DOCKER_PLAYGROUND_DIR
+  );
   if (fromEnv) {
     const resolved = path.resolve(fromEnv);
     if (!isRepoRoot(resolved)) {
