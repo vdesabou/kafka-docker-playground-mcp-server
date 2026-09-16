@@ -1,8 +1,12 @@
 {
   "mcpServers": {
-    "playground": {
-      "command": "node",
-      "args": ["/absolute/path/to/kafka-docker-playground-mcp-server/dist/index.js"],
+    "mcp-playground": {
+      "command": "npx",
+      "args": [
+        "--registry=https://registry.npmjs.org",
+        "-y",
+        "github:vdesabou/kafka-docker-playground-mcp-server"
+      ],
       "env": {
         "PLAYGROUND_REPO_ROOT": "/absolute/path/to/kafka-docker-playground"
       }
