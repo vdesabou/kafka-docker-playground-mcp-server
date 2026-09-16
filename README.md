@@ -88,23 +88,9 @@ claude mcp add mcp-playground -- node /path/to/kafka-docker-playground-mcp-serve
 | `KAFKA_DOCKER_PLAYGROUND_DIR` | Accepted as an alias for the above. |
 | `CONFLUENT_CLOUD_API_KEY` / `CONFLUENT_CLOUD_API_SECRET` | Required only by `playground_connectors` when the current run uses a **fully managed** or **custom** connector. |
 
-The server needs the `docker` CLI on its `PATH` and a reachable daemon.
-
-## Docker
-
-Running in a container is supported but needs the host daemon *and* the repo at
-the **same absolute path** as on the host, because `playground.ini` stores
-absolute paths:
-
-```bash
-docker run --rm -i \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /path/to/kafka-docker-playground:/path/to/kafka-docker-playground \
-  -e PLAYGROUND_REPO_ROOT=/path/to/kafka-docker-playground \
-  vdesabou/mcp-playground-server:latest
-```
-
-Running with `node` directly is simpler and is the recommended setup.
+The server needs the `docker` CLI on its `PATH` and a reachable daemon — it
+inspects the playground's containers, so it runs on the host rather than in a
+container of its own.
 
 ## Development
 
