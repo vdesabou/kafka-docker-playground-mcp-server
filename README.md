@@ -27,8 +27,10 @@ provide.
 
 On a real 918 KB / 10 645-line `connect.log`, `playground_logs` returns **4.5 KB**
 containing the full `Caused by:` chain — a ~200× reduction with the diagnostic
-content intact. `playground_find_example` indexes 2557 scripts in ~650 ms and
-answers `"s3 sink proxy"` with `connect/connect-aws-s3-sink/s3-sink-proxy.sh`.
+content intact. `playground_find_example` indexes 2558 scripts in under a second
+and answers `"s3 sink proxy"` with `connect/connect-aws-s3-sink/s3-sink-proxy.sh`.
+95% of those scripts are indexed with their connector class; the rest are the
+client, ksqlDB, Flink and environment examples, which have no connector.
 
 ## Secrets
 
