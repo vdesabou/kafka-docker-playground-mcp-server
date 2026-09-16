@@ -8,7 +8,7 @@ log() {
 
 # Set default environment variables if not provided
 export NODE_ENV="${NODE_ENV:-production}"
-export MCP_SERVER_NAME="${MCP_SERVER_NAME:-mcp-playground-server}"
+export MCP_SERVER_NAME="${MCP_SERVER_NAME:-kafka-docker-playground}"
 export MCP_SERVER_VERSION="${MCP_SERVER_VERSION:-1.0.0}"
 
 log "Starting MCP Playground Server..."
